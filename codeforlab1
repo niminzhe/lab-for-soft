@@ -1,0 +1,121 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class lab1 {
+	
+public static void main(String[]args) throws IOException {
+	System.out.println("please input filename");
+    Scanner s1 = new Scanner(System.in);
+    String file = s1.nextLine();
+    Scanner s2 = new Scanner(System.in);
+    System.out.println("please input need");
+    int level = s2.nextInt();
+    String x="";
+    FileReader filereader = new FileReader(file);
+    BufferedReader bufferedreader = new BufferedReader(filereader);
+    String line=bufferedreader.readLine();//read the file
+    while(line!=null) {//get the message and loop
+        x+=line;
+        line=bufferedreader.readLine();
+    }
+    if(level>=1) 
+    level1(x);
+    if(level>=2) 
+    level2(x);
+    if(level>=3)
+    level34(x,level);
+    s1.close();
+}
+    
+    
+    
+    public static void level1(String a) {
+    String key="abstract、assert、boolean、break、byte、case、catch、char、class、continue、default、do、double、"
+    		    + "else、enum、extends、final、finally、float、for、if、implements、import、int、interface、instanceof、"
+    		    + "long、native、new、package、private、protected、public、return、short、static、strictfp、super、"
+    		    + "switch、synchronized、this、throw、throws、transient、try、void、volatile、while";//list keywords
+    String []s=key.split("、");
+    int num = 0;
+    for(int i=0;i<s.length;i++) {
+        Pattern p=Pattern.compile("[^a-z]"+s[i]+"[^a-z]");//avoid the special condition such as longer contain long
+        Matcher m=p.matcher(a);//to get if it match
+        while(m.find())
+        num++;
+    }
+    System.out.println("total num: "+num);
+}
+    
+    
+    public static void level2(String a) {
+    int num1=0;
+    int num2=0;
+    Pattern p1=Pattern.compile("switch");
+    Matcher m1=p1.matcher(a);
+    while(m1.find())
+    num1++;
+    System.out.println("switch num: "+num1);
+    System.out.print("case num: ");
+    
+    Pattern p2 = Pattern.compile("switch.*?}");//to find the place of switch
+    Matcher m2 = p2.matcher(a);
+    while(m2.find()) {
+        String text=m2.toString();//
+        Pattern p3 = Pattern.compile("[^a-zA-Z_]"+"case"+"[^a-zA-Z_]");
+        Matcher m3 = p3.matcher(text);
+        while(m3.find()) 
+            num2++;
+        System.out.print(num2+" ");
+        num2=0;//cut it before next loop
+    }
+    System.out.println();
+    }
+    
+    
+    
+    public static void level34(String a,int b) {
+    	int num1=0;
+    	int num2=0;
+    	Stack<String> s1 = new Stack();
+    	Pattern p = Pattern.compile("else *if|else|if");
+        Matcher m=p.matcher(a);
+        while(m.find()) {
+            String x=a.substring(m.start(),m.end());
+            s1.push(x);
+        }
+        Stack<String> s2 = new Stack<String>();
+        boolean bool = false;//to judge it when get if the thing beside is the else if
+        while (!s1.isEmpty()) {
+            String temp = s1.pop();
+            if (temp.equals("else")) {
+                s2.push(temp);
+            } 
+            else if (temp.equals("else if")) {
+                s2.push(temp);
+            } //when it is else or else if push back
+            else {
+                while (s2.peek().equals("else if")) {
+                	s2.pop();//when it is if to pop until get else
+                    bool = true;
+                }
+                if (s2.peek().equals("else")) {
+                	s2.pop();
+                }
+                if (bool) {
+                    num1++;
+                    bool = false;
+                } else {
+                    num2++;
+                }
+            }
+    }
+        System.out.println("if-else num: " + num1);
+        if(b>3)
+        System.out.println("if-elseif-else: " + num2);
+}
+}
